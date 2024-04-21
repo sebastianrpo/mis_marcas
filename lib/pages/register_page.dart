@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_marcas/pages/login_page.dart';
+import 'package:mis_marcas/repository/firebase_api.dart';
 import '../models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -16,6 +16,8 @@ class RegisterPage extends StatefulWidget {
 enum Genre { masculino, femenino }
 
 class _RegisterPageState extends State<RegisterPage> {
+
+  final FirebaseApi _firebaseApi = FirebaseApi();
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
@@ -59,9 +61,12 @@ class _RegisterPageState extends State<RegisterPage> {
     scaffold.showSnackBar(
       SnackBar(
         content: Text(msg),
+        duration: const Duration(seconds: 60),
         action: SnackBarAction(
             label: 'Aceptar',
-            onPressed: () {
+            onPressed: (){
+              scaffold.hideCurrentSnackBar;
+              _email.text = "";
               _password.text = "";
               _repPassword.text = "";
             }),
@@ -74,22 +79,39 @@ class _RegisterPageState extends State<RegisterPage> {
     prefs.setString("user", jsonEncode(user));
   }
 
+  void _registerUser(String email, String password) async{
+    final result = await _firebaseApi.registerUser(email, password);
+    if (result == 'weak-password') {
+      _showMsg('La contraseña debe tener más de 6 caracteres.');
+    } else if (result == 'email-already-in-use') {
+      _showMsg('The account already exists for that email.');
+    } else if (result == 'invalid-email'){
+      _showMsg('El correo electrónico es inválido');
+    } else if (result == 'network-request-failed'){
+      _showMsg("Revise su conexión a internet");
+    }
+  }
   void _onRegisterButtonClicked() {
     setState(() {
-      if (_password.text == _repPassword.text) {
+      if(!_email.text.isValidEmail()){
+        _showMsg("El correo electrónico es inválido");
+      } else if (_password.text != _repPassword.text) {
+        _showMsg("Las contraseñas no son iguales");
+      } else if(_password.text.length < 6){
+            _showMsg("La contraseña debe tener 6 o más caracteres");
+          } else {
+        _registerUser(_email.text, _password.text);
         if (_genre == Genre.femenino) {
           genre = "Femenino";
         } else {
           genre = "Masculino";
-        }
+        }}
         var user = User(_name.text, _email.text, _password.text, genre,
             _atletismo, _ciclismo, _natacion, _bornDate);
         _saveUser(user);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const LoginPage()));
-        _showMsg("Usuario registrado exitosamente");
+        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+        //_showMsg("Usuario registrado exitosamente");
       } else {
-        _showMsg("Las contraseñas no son iguales");
       }
     });
   }
@@ -232,12 +254,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: () {
                       _onRegisterButtonClicked();
                     },
-                    child: Text("Registrar")),
+                    child: const Text("Registrar")),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+extension on String{
+  bool isValidEmail(){
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(this);
   }
 }

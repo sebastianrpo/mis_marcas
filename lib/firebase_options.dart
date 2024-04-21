@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'mismarcas-901f4.appspot.com',
     iosBundleId: 'com.sebastianrpo.misMarcas',
   );
+
 }

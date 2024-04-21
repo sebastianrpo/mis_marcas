@@ -9,7 +9,6 @@ import 'package:mis_marcas/pages/home_tabs_page.dart';
 import 'package:mis_marcas/pages/login_page.dart';
 import 'package:mis_marcas/pages/register_page.dart';
 import 'package:mis_marcas/pages/splash_page.dart';
-
 import 'firebase_options.dart';
 
 Future<void> main() async{
@@ -44,7 +43,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
-      home: const RegisterPage(),
+      home: const SplashPage(),
     );
   }
 }

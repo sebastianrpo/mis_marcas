@@ -1,7 +1,7 @@
 class User {
+  var _uid;
   var _name;
   var _email;
-  var _password;
   var _genre;
   var _isRunningFavorite;
   var _isCyclingFavorite;
@@ -9,6 +9,12 @@ class User {
   var _bornDate;
 
   User.Empty();
+
+  get uid => _uid;
+
+  set uid(value) {
+    _uid = value;
+  }
 
   get name => _name;
 
@@ -48,20 +54,14 @@ class User {
     _genre = value;
   }
 
-  get password => _password;
-
-  set password(value) {
-    _password = value;
-  }
-
   set email(value) {
     _email = value;
   }
 
   User(
+      this._uid,
       this._name,
       this._email,
-      this._password,
       this._genre,
       this._isRunningFavorite,
       this._isCyclingFavorite,
@@ -69,9 +69,9 @@ class User {
       this._bornDate);
 
   Map<String, dynamic> toJson() => {
+        'uid': _uid,
         'name': _name,
         'email': _email,
-        'password': _password,
         'genre': _genre,
         'isRunningFavorite': _isRunningFavorite,
         'isCyclingFavorite': _isCyclingFavorite,
@@ -80,9 +80,9 @@ class User {
       };
 
   User.fromJson(Map<String, dynamic> json)
-      : _name = json['name'],
+      : _uid = json['uid'],
+        _name = json['name'],
         _email = json['email'],
-        _password = json['password'],
         _genre = json['genre'],
         _isRunningFavorite = json['isRunningFavorite'],
         _isCyclingFavorite = json['isCyclingFavorite'],

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mis_marcas/pages/home_bottom_navigation_bar_page.dart';
 import 'package:mis_marcas/pages/register_page.dart';
+import 'package:mis_marcas/repository/firebase_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user.dart';
@@ -18,16 +19,25 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   var _passwordVisible = false;
+  final FirebaseApi _firebaseApi = FirebaseApi();
 
   User userLoaded = User.Empty();
 
-  void _onLoginButtonClicked() {
-    if (_email.text == userLoaded.email &&
-        _password.text == userLoaded.password) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const HomeBottomNavigationBarPage()));
+  void _onLoginButtonClicked() async {
+    if (_email.text.isEmpty || _password.text.isEmpty) {
+      _showMsg("Debe ingresar correo electrónico y contraseña");
+    } else if (!_email.text.isValidEmail()) {
+      _showMsg("El correo electrónico es inválido");
     } else {
-      _showMsg("Usuario o contraseña incorrectos");
+      final result = await _firebaseApi.loginUser(_email.text, _password.text);
+      if (result == 'network-request-failed') {
+        _showMsg("Revise su conexión a internet");
+      } else if (result == 'invalid-credential') {
+        _showMsg("Correo electrónico o contraseña incorrectas");
+      } else {
+        _showMsg("Bienvenido");
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeBottomNavigationBarPage()));
+      }
     }
   }
 
@@ -53,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    getUser();
+    //getUser();
     _passwordVisible = false;
     super.initState();
   }
@@ -129,5 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text("Registrarse"))
               ],
             ))));
+  }
+}
+extension on String{
+  bool isValidEmail(){
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(this);
   }
 }

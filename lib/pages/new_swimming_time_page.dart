@@ -1,7 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_marcas/models/SwimTime.dart';
+import 'package:mis_marcas/models/SwimTimeFirebase.dart';
+import 'package:mis_marcas/repository/firebase_api.dart';
 
 import '../boxes.dart';
 
@@ -15,6 +16,7 @@ class NewSwimmingTimePage extends StatefulWidget {
 enum PoolSize { size50, size25 }
 
 class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
+  final FirebaseApi _firebaseApi = FirebaseApi();
   final _tournamentName = TextEditingController();
   final _toSwim = TextEditingController();
   final _time = TextEditingController();
@@ -68,13 +70,20 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
     return dateFormatted;
   }
 
-  void _onRegisterButtonClicked() {
+  void _onRegisterButtonClicked() async {
     var _poolSize = "25 mts";
     if (_poolSize == PoolSize.size50) {
       _poolSize = "50 mts";
     }
 
-    var swimTime = SwimTime()
+    var swimTime = SwimTimeFirebase(
+        "", _dateTournament, _poolSize, _time.text, _pruebaSeleccionada,
+        _tournamentName.text);
+    var result = await _firebaseApi.saveRecord(swimTime);
+    if (result == "network-request-failed") {
+      _showMsg("Revise su conexión a internet");
+    } else {
+      /*var swimTime = SwimTime()
       ..tournamentName = _tournamentName.text
       ..dateTournament = _dateTournament
       ..poolSize = _poolSize
@@ -82,9 +91,10 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
       ..time = _time.text;
 
     final box = Boxes.getSwimTimeBox();
-    box.add(swimTime);
+    box.add(swimTime);*/
 
-    Navigator.pop(context);
+      Navigator.pop(context);
+    }
   }
 
   void _showSelectedDate() async {
@@ -104,6 +114,20 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
     }
   }
 
+  void _showMsg(String msg) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 60),
+        action: SnackBarAction(
+            label: 'Aceptar',
+            onPressed: () {
+              scaffold.hideCurrentSnackBar;
+            }),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

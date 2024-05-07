@@ -35,7 +35,6 @@ class _LoginPageState extends State<LoginPage> {
       } else if (result == 'invalid-credential') {
         _showMsg("Correo electrónico o contraseña incorrectas");
       } else {
-        _showMsg("Bienvenido");
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeBottomNavigationBarPage()));
       }
     }

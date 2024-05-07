@@ -102,9 +102,13 @@ class _RegisterPageState extends State<RegisterPage> {
     var user = User(uid, _name.text, _email.text, genre, _atletismo, _ciclismo,
         _natacion, _bornDate);
     var result = await _firebaseApi.createUserInDB(user);
-    //_saveUser(user);
-    Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    if (result == "network-request-failed") {
+      _showMsg("Revise su conexión a internet");
+    } else {
+      //_saveUser(user);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    }
   }
 
   void _onRegisterButtonClicked() {

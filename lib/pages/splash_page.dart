@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mis_marcas/pages/home_bottom_navigation_bar_page.dart';
 import 'package:mis_marcas/pages/login_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -18,8 +20,12 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _closeSplash() async {
     Future.delayed(const Duration(seconds: 2), () async{
+      if(FirebaseAuth.instance.currentUser?.uid != null){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeBottomNavigationBarPage()));
+      } else {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
-    });
+    }}
+      );
   }
 
   @override

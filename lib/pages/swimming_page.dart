@@ -74,29 +74,34 @@ class _SwimmingPageState extends State<SwimmingPage> {
     );
   }
 
-  Card buildCard(QueryDocumentSnapshot record) {
+  InkWell buildCard(QueryDocumentSnapshot record) {
     var heading = record['toSwim'];
     var subheading = record['tournamentName'];
     var supportingText = "Fecha: ${record['dateTournament']}";
-    return Card(elevation: 4,
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(heading),
-            subtitle: Text(subheading),
-            onLongPress: (){
-              setState(() {
-                showAlertDialog(context);
-              });
-            },
-          ),
-          Container(
-            padding: EdgeInsets.all(16),
-            alignment: Alignment.centerLeft,
-            child: Text(supportingText),
-          ),
-        ],
-      ),);
+    return 
+      InkWell(
+        onTap: (){
+          print("clic");
+        },
+        onLongPress: (){
+          print("onLongPress");
+          showAlertDialog(context);
+        },
+        child: Card(elevation: 4,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(heading),
+              subtitle: Text(subheading),
+            ),
+            Container(
+              padding: EdgeInsets.all(16),
+              alignment: Alignment.centerLeft,
+              child: Text(supportingText),
+            ),
+          ],
+        ),),
+      );
   }
 
   showAlertDialog(BuildContext context) {
@@ -105,10 +110,10 @@ class _SwimmingPageState extends State<SwimmingPage> {
       content: const Text(
           "¿Está seguro que desea eliminar la marca registrada?"),
       actions: <Widget>[
-        TextButton(onPressed: () => Navigator.pop(context, 'Ok'),
-            child: const Text('Aceptar')),
         TextButton(onPressed: () => Navigator.pop(context, 'Cancel'),
             child: const Text('Cancelar')),
+        TextButton(onPressed: () => Navigator.pop(context, 'Ok'),
+            child: const Text('Aceptar')),
       ],
     );
     showDialog(context: context, builder: (BuildContext context){

@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mis_marcas/models/SwimTime.dart';
 import 'package:mis_marcas/models/SwimTimeFirebase.dart';
 import 'package:mis_marcas/repository/firebase_api.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../boxes.dart';
 
@@ -24,6 +27,7 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
   String _dateTournament = "";
   PoolSize? _poolSize = PoolSize.size25;
   String _pruebaSeleccionada = "";
+  File? image;
 
   final List<String> _events25mts = [
     '25 Libre',
@@ -48,7 +52,7 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
     '50 Libre',
     '100 Libre',
     '200 Libre'
-    '400 Libre',
+        '400 Libre',
     '800 Libre',
     '1500 Libre',
     '50 Espalda',
@@ -76,10 +80,9 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
       _poolSize = "50 mts";
     }
 
-    var swimTime = SwimTimeFirebase(
-        "", _dateTournament, _poolSize, _time.text, _pruebaSeleccionada,
-        _tournamentName.text);
-    var result = await _firebaseApi.saveRecord(swimTime);
+    var swimTime = SwimTimeFirebase("", _dateTournament, _poolSize, _time.text,
+        _pruebaSeleccionada, _tournamentName.text, "");
+    var result = await _firebaseApi.saveRecord(swimTime, image);
     if (result == "network-request-failed") {
       _showMsg("Revise su conexión a internet");
     } else {
@@ -94,6 +97,20 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
     box.add(swimTime);*/
 
       Navigator.pop(context);
+    }
+  }
+
+  Future pickImage() async {
+    try{
+      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if(image == null) return;
+      final imageTemp = File(image.path);
+      setState(() {
+        this.image = imageTemp;
+      });
+    }
+    on PlatformException catch(e){
+      print('Failed to pick image: $e');
     }
   }
 
@@ -128,6 +145,7 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,10 +159,35 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Image(
-                  image: AssetImage('assets/images/swimminglarge.png'),
-                  width: 150,
-                  height: 150,
+                Container(
+                  decoration: const BoxDecoration(color: Colors.white),
+                  height: 170,
+                  child: Stack(
+                    children: [
+                      image != null
+                          ? Image.file(
+                              image!,
+                              width: 150,
+                              height: 150,
+                            )
+                          : const Image(
+                              image:
+                                  AssetImage('assets/images/swimminglarge.png'),
+                              width: 150,
+                              height: 150,
+                            ),
+                      Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: IconButton(
+                            alignment: Alignment.bottomLeft,
+                            onPressed: () async {
+                              pickImage();
+                            },
+                            icon: const Icon(Icons.camera_alt_outlined, color: Colors.red,),
+                          ))
+                    ],
+                  ),
                 ),
                 const SizedBox(
                   height: 8.0,
@@ -212,21 +255,21 @@ class _NewSwimmingTimePageState extends State<NewSwimmingTimePage> {
                     initialSelection: _events25mts[0],
                     requestFocusOnTap: true,
                     label: const Text('Prueba'),
-                    onSelected: (String? event){
+                    onSelected: (String? event) {
                       setState(() {
                         _pruebaSeleccionada = event!;
                       });
                     },
-                    dropdownMenuEntries: _events25mts.map<DropdownMenuEntry<String>>((String event){
-                      return DropdownMenuEntry<String> (
-                      value:event,
-                  label: event,
+                    dropdownMenuEntries: _events25mts
+                        .map<DropdownMenuEntry<String>>((String event) {
+                      return DropdownMenuEntry<String>(
+                        value: event,
+                        label: event,
                       );
-                  }).toList(),
+                    }).toList(),
                   )
                 else
                   const Text("Seleccionó 50 mts"),
-
                 const SizedBox(
                   height: 8.0,
                 ),

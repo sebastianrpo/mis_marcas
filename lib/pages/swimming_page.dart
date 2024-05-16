@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:mis_marcas/models/SwimTime.dart';
 import 'package:mis_marcas/pages/new_swimming_time_page.dart';
+import 'package:mis_marcas/repository/firebase_api.dart';
 
 import '../boxes.dart';
 
@@ -15,6 +16,8 @@ class SwimmingPage extends StatefulWidget {
 }
 
 class _SwimmingPageState extends State<SwimmingPage> {
+  final FirebaseApi _firebaseApi = FirebaseApi();
+
   void _addButtonClicked() {
     setState(() {
       Navigator.push(context,
@@ -53,17 +56,20 @@ class _SwimmingPageState extends State<SwimmingPage> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection("users").doc(
-              FirebaseAuth.instance.currentUser?.uid)
+          stream: FirebaseFirestore.instance
+              .collection("users")
+              .doc(FirebaseAuth.instance.currentUser?.uid)
               .collection("records")
               .snapshots(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) return const Text("Loading...");
-            return ListView.builder(itemCount: snapshot.data?.docs.length,
+            return ListView.builder(
+              itemCount: snapshot.data?.docs.length,
               itemBuilder: (context, index) {
                 QueryDocumentSnapshot record = snapshot.data!.docs[index];
                 return buildCard(record);
-              },);
+              },
+            );
           },
         ),
       ),
@@ -78,16 +84,19 @@ class _SwimmingPageState extends State<SwimmingPage> {
     var heading = record['toSwim'];
     var subheading = record['tournamentName'];
     var supportingText = "Fecha: ${record['dateTournament']}";
-    return 
-      InkWell(
-        onTap: (){
-          print("clic");
-        },
-        onLongPress: (){
-          print("onLongPress");
-          showAlertDialog(context);
-        },
-        child: Card(elevation: 4,
+    var cardImage = record['urlPicture'] == ""
+        ? const AssetImage('assets/images/logo.png') as ImageProvider
+        : NetworkImage(record["urlPicture"]);
+    return InkWell(
+      onTap: () {
+        print("clic");
+      },
+      onLongPress: () {
+        print("onLongPress");
+        showAlertDialog(context, record);
+      },
+      child: Card(
+        elevation: 4,
         child: Column(
           children: [
             ListTile(
@@ -95,29 +104,43 @@ class _SwimmingPageState extends State<SwimmingPage> {
               subtitle: Text(subheading),
             ),
             Container(
+              height: 100,
+              width: 100,
+              child: Ink.image(image: cardImage),
+            ),
+            Container(
               padding: EdgeInsets.all(16),
               alignment: Alignment.centerLeft,
               child: Text(supportingText),
             ),
           ],
-        ),),
-      );
+        ),
+      ),
+    );
   }
 
-  showAlertDialog(BuildContext context) {
+  showAlertDialog(BuildContext context, QueryDocumentSnapshot record) {
     AlertDialog alert = AlertDialog(
       title: const Text("Advertencia"),
-      content: const Text(
-          "¿Está seguro que desea eliminar la marca registrada?"),
+      content:
+          const Text("¿Está seguro que desea eliminar la marca registrada?"),
       actions: <Widget>[
-        TextButton(onPressed: () => Navigator.pop(context, 'Cancel'),
+        TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
             child: const Text('Cancelar')),
-        TextButton(onPressed: () => Navigator.pop(context, 'Ok'),
-            child: const Text('Aceptar')),
+        TextButton(
+          child: const Text('Aceptar'),
+          onPressed: () => {
+            _firebaseApi.deleteRecord(record.id),
+            Navigator.pop(context, 'Aceptar'),
+          },
+        ),
       ],
     );
-    showDialog(context: context, builder: (BuildContext context){
-      return alert;
-    });
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        });
   }
 }

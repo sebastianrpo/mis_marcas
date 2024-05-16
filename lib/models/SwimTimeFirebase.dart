@@ -6,6 +6,7 @@ class SwimTimeFirebase{
   var _time;
   var _toSwim;
   var _tournamentName;
+  var _urlPicture;
 
   get id => _id;
 
@@ -43,13 +44,20 @@ class SwimTimeFirebase{
     _dateTournament = value;
   }
 
+  get urlPicture => _urlPicture;
+
+  set urlPicture(value) {
+    _urlPicture = value;
+  }
+
   Map<String, dynamic> toJson() => {
     'id': _id,
     'dateTournament': _dateTournament,
     'poolSize': _poolSize,
     'time': _time,
     'toSwim': _toSwim,
-    'tournamentName': _tournamentName
+    'tournamentName': _tournamentName,
+    'urlPicture': _urlPicture,
   };
 
   SwimTimeFirebase.fromJson(Map<String, dynamic> json)
@@ -58,8 +66,9 @@ class SwimTimeFirebase{
         _poolSize = json['poolSize'],
         _time = json['time'],
         _toSwim = json['toSwim'],
-        _tournamentName = json['tournamentName'];
+        _tournamentName = json['tournamentName'],
+        _urlPicture = json['urlPicture'];
 
   SwimTimeFirebase(this._id, this._dateTournament, this._poolSize, this._time,
-      this._toSwim, this._tournamentName);
+      this._toSwim, this._tournamentName, this._urlPicture);
 }

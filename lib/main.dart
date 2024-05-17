@@ -35,7 +35,8 @@ class MyApp extends StatelessWidget {
       title: 'Mis marcas',
       localizationsDelegates: const[
         GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const[
         Locale("es", "CO"),

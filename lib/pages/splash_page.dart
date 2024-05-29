@@ -4,6 +4,8 @@ import 'package:mis_marcas/pages/home_bottom_navigation_bar_page.dart';
 import 'package:mis_marcas/pages/login_page.dart';
 import 'package:mis_marcas/pages/sport_store_page.dart';
 
+import 'detail_store_page.dart';
+
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
